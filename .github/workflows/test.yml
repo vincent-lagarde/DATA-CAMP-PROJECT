@@ -46,9 +46,6 @@ jobs:
     - name: Install the ramp-kit's dependencies
       run: pip install -r requirements.txt
 
-    - name: Download data
-      run: python download_data.py
-
     - name: Ramp test
       run: ramp-test
 
