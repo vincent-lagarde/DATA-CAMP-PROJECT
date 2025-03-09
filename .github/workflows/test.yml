@@ -87,4 +87,4 @@ jobs:
         pip install -r requirements.txt
 
     - name: Check the starting-kit notebook
-      run: jupyter nbconvert --execute template_starting_kit.ipynb --to html --ExecutePreprocessor.kernel_name=python3
+      run: jupyter nbconvert --execute wine_starting_kit.ipynb --to html --ExecutePreprocessor.kernel_name=python3
