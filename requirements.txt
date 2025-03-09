@@ -3,3 +3,8 @@ numpy
 pandas
 matplotlib
 scikit-learn
+torch
+tqdm
+transformers
+accelerate
+bert_sklearn

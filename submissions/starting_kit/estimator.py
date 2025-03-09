@@ -1,13 +1,10 @@
+from sklearn.dummy import DummyClassifier
 
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
-
+class DummyWrapper(DummyClassifier):
+    def predict(self, X):
+        preds = super().predict(X)
+        # Convert predictions to plain Python ints
+        return [int(p) for p in preds]
 
 def get_estimator():
-    pipe = make_pipeline(
-        StandardScaler(),
-        LogisticRegression()
-    )
-
-    return pipe
+    return DummyWrapper(strategy='most_frequent')
