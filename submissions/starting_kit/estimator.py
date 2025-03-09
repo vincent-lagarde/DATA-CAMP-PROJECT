@@ -1,10 +1,21 @@
-from sklearn.dummy import DummyClassifier
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import FunctionTransformer
 
-class DummyWrapper(DummyClassifier):
-    def predict(self, X):
-        preds = super().predict(X)
-        # Convert predictions to plain Python ints
-        return [int(p) for p in preds]
+transformer = FunctionTransformer(lambda df: df["comment"].fillna(""),
+                                  validate=False)
+
+vectorizer = TfidfVectorizer(max_features=50,
+                             ngram_range=(1, 2))
+rf_clf = RandomForestClassifier(n_estimators=50)
+
+pipe = Pipeline([
+    ("text_isolator", transformer),
+    ("tfidf", vectorizer),
+    ("clf", rf_clf)
+])
+
 
 def get_estimator():
-    return DummyWrapper(strategy='most_frequent')
+    return pipe

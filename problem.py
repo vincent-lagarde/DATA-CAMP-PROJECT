@@ -2,11 +2,11 @@ import rampwf as rw
 import numpy as np
 import pandas as pd
 from pathlib import Path
-
 from sklearn.model_selection import StratifiedGroupKFold
 
 problem_title = 'Wine Competition'
 
+# The original string region names
 _prediction_label_names = np.array([
     'Bordeaux', 'Languedoc-Roussillon', 'Alsace', 'Champagne',
     'Vallee de la Loire', 'Bourgogne', 'Vallee du Rhone', 'Provence',
@@ -15,6 +15,7 @@ _prediction_label_names = np.array([
 
 _target_column_name = 'region'
 
+# Mapping from region names to integer labels
 _label_to_index = {
     label: index for index, label in enumerate(_prediction_label_names)
 }
@@ -22,12 +23,24 @@ _index_to_label = {
     index: label for index, label in enumerate(_prediction_label_names)
 }
 
-# A type (class) which will be used to create wrapper objects for y_pred
-Predictions = rw.prediction_types.make_multiclass(
-    label_names=_prediction_label_names
+# Build Predictions using integer labels
+_base_predictions = rw.prediction_types.make_multiclass(
+    label_names=list(range(len(_prediction_label_names)))
 )
 
-# An object implementing the workflow
+
+# Override the Predictions class to ensure its label_names are integers.
+class MyPredictions(_base_predictions):
+    # Override the class attribute to be a list of integers.
+    label_names = list(range(len(_prediction_label_names)))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+Predictions = MyPredictions
+
+# Define the workflow
 workflow = rw.workflows.Estimator()
 
 score_types = [
@@ -37,13 +50,16 @@ score_types = [
 
 def encode_label(y: pd.Series) -> pd.Series:
     """
-    Encode a series of str labels to their int counterparts.
+    Encode a series of region names (strings) to their corresponding int
+    labels.
     """
     return y.map(_label_to_index)
 
 
 def decode_label(y: pd.Series) -> pd.Series:
-    """Decode a series of int labels to their str counterparts"""
+    """
+    Decode a series of integer labels to their region names.
+    """
     return y.map(_index_to_label)
 
 
@@ -59,11 +75,11 @@ def load_data(path='.', file='data_vivino_train.tsv'):
     y = X_df[_target_column_name]
     X_df = X_df.drop(columns=[_target_column_name])
 
+    # Encode region names to integers so they match Predictions.label_names.
     y = encode_label(y)
     return X_df, y
 
 
-# READ DATA
 def get_train_data(path='.'):
     file = 'data_vivino_train.tsv'
     return load_data(path, file)
